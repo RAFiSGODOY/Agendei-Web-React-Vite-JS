@@ -5,3 +5,24 @@ body{
     font-family: "Poppins";
     overflow-x: hidden;
 }
+
+
+.mt-page{
+    margin-top: 90px;
+}
+
+
+.mt-page2{
+    margin-top: 140px;
+}
+
+
+
+select {
+    border: none ; 
+    outline: none; 
+    background-color: #fff;
+    cursor: pointer;
+    appearance: none;
+    width: 100%;
+}
