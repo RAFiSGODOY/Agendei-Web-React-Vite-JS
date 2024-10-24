@@ -1,12 +1,18 @@
 import "./appointments.css";
 import Navbar from "../../components/navbar/navbar.jsx";;
 import { Link, useNavigate } from "react-router-dom";
-import { doctors, appointments } from "../../constants/data.js";
 import Appointment from "../../components/appointment/appointment.jsx";
+import api from "../../constants/api.js";
+
+import { useEffect, useState } from "react";
 
 function Appointments() {
 
     const navigate = useNavigate();
+    const [appointments, setAppointments] = useState([]);
+    const [alertMessage, setAlertMessage] = useState("");
+    const [doctor, setIdDoctor] = useState(0);
+    const [doctors, setDoctors] = useState([]);
 
     function ClickEdit(id_appointment) {
         navigate("/appointments/edit/" + id_appointment);
@@ -14,6 +20,60 @@ function Appointments() {
 
     function ClickDelete(id_appointment) {
         console.log("Excluir " + id_appointment);
+    }
+
+    async function LoadAppointments(){
+
+        try {
+
+            const response = await api.get("/admin/appointments" ,{
+                params: {
+                    id_doctor: doctor
+                }
+            })
+
+            if(response.data){
+                setAppointments(response.data);
+
+            }
+            
+        } catch (error) {
+            if (error.response?.data.error)
+                setAlertMessage(error.response?.data.error)
+            else
+                setAlertMessage("Erro ao listar Agendamentos")
+
+        }
+    }
+
+    useEffect(() =>{
+
+        LoadAppointments();
+        LoadDoctors();
+
+    }, [])
+
+    async function LoadDoctors(){
+
+        try {
+
+            const response = await api.get("/doctors");
+
+            if(response.data){
+                setDoctors(response.data);
+            }
+        } catch (error) {
+            if (error.response?.data.error)
+                setAlertMessage(error.response?.data.error)
+            else
+                setAlertMessage("Erro ao listar Médicos")
+
+        }
+    }
+
+    function ChangeDoctor(doc){
+        setIdDoctor(doc.target.value)
+
     }
 
     return <div className="container-fluid mt-page">
@@ -34,13 +94,14 @@ function Appointments() {
                 <input id="endtDate" className="form-control" type="date" />
 
                 <div className="form-control ms-3 me-3">
-                    <select name="doctor" id="doctor">
-                        <option value="">Todos os médicos</option>
+                    <select name="doctor" id="doctor" value={doctor} onChange={ChangeDoctor}>
+                        <option value="0">Todos os médicos</option>
 
                         {
                             doctors.map((doc) => {
                                 return <option key={doc.id_doctor}
                                     value={doc.id_doctor}>
+                                
                                     {doc.name}
                                 </option>
                             })
@@ -48,7 +109,7 @@ function Appointments() {
                     </select>
                 </div>
 
-                <button className="btn btn-primary">Filtrar</button>
+                <button onClick={LoadAppointments} className="btn btn-primary" type="button">Filtrar</button>
             </div>
 
         </div>
@@ -84,7 +145,11 @@ function Appointments() {
                 </tbody>
             </table>
         </div>
-
+        {alertMessage.length > 0 &&
+                        <div className="alert alert-danger" role="alert">
+                            {alertMessage}
+                        </div>
+                    }
     </div>
 }
 
