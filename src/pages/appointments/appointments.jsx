@@ -11,8 +11,10 @@ function Appointments() {
     const navigate = useNavigate();
     const [appointments, setAppointments] = useState([]);
     const [alertMessage, setAlertMessage] = useState("");
-    const [doctor, setIdDoctor] = useState(0);
+    const [doctor, setIdDoctor] = useState("");
     const [doctors, setDoctors] = useState([]);
+    const [dt_start, setDT_START] = useState("");
+    const [dt_end, setDT_END] = useState("");
 
     function ClickEdit(id_appointment) {
         navigate("/appointments/edit/" + id_appointment);
@@ -28,7 +30,9 @@ function Appointments() {
 
             const response = await api.get("/admin/appointments" ,{
                 params: {
-                    id_doctor: doctor
+                    id_doctor: doctor,
+                    dt_start: dt_start,
+                    dt_end: dt_end
                 }
             })
 
@@ -63,8 +67,12 @@ function Appointments() {
                 setDoctors(response.data);
             }
         } catch (error) {
+            if(error.response.status == 401){
+                navigate("/");
+            }
             if (error.response?.data.error)
                 setAlertMessage(error.response?.data.error)
+
             else
                 setAlertMessage("Erro ao listar Médicos")
 
@@ -73,6 +81,8 @@ function Appointments() {
 
     function ChangeDoctor(doc){
         setIdDoctor(doc.target.value)
+        setDT_START(doc.target.value)
+        setDT_END(doc.target.value)
 
     }
 
@@ -89,13 +99,13 @@ function Appointments() {
             </div>
 
             <div className="d-flex justify-content-end">
-                <input id="startDate" className="form-control" type="date" />
+                <input id="startDate" className="form-control" type="date"  onChange={(doc) => setDT_START(doc.target.value)}/>
                 <span className="m-2">Até</span>
-                <input id="endtDate" className="form-control" type="date" />
+                <input id="endtDate" className="form-control" type="date" onChange={(doc)=> setDT_END(doc.target.value)} />
 
                 <div className="form-control ms-3 me-3">
                     <select name="doctor" id="doctor" value={doctor} onChange={ChangeDoctor}>
-                        <option value="0">Todos os médicos</option>
+                        <option value="">Todos os médicos</option>
 
                         {
                             doctors.map((doc) => {
